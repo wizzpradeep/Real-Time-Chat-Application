@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block head%}
+<title>Rooms</title>
+
+
+{% endblock %}
+
+{% block body %}
+<div
+    class=" w-[90vw] lg:w-[50vw] mx-auto h-[450px] md:h-[500px] brd py-5 px-4 bg-gray-800 mt-10 flex flex-col rounded-2xl shadow-3xl relative">
+
+
+    <div class="display-rooms  flex-1 overflow-scroll scrollbar-hide">
+        {% for room in rooms %}
+        <div class="text-white p-4 relative">
+            {% if room.user == request.user %}
+            <a href="{% url 'delete_room' room.id %}"
+                class="absolute right-0 text-gray-300 uppercase font-bold text-xs hover:text-red-500">delete</a>
+            {% endif %}
+            <a href="{% url 'myroom' room.id %}" class="md:text-2xl font-bold">{{room.name}}</a>
+            <p class="text-gray-500 text-sm sm:text:xl">{{room.user.username}}</p>
+        </div>
+        <hr>
+        {% endfor %}
+    </div>
+
+
+    <form action="" method="post" id="id_create_room"
+        class=" rounded flex flex-col gap-4 bg-gray-700 mt-5 md:py-5 py-3  md:px-4 px-2 rounded-3xl">
+
+        {% csrf_token %}
+
+        <h1 class="text-white font-extrabold text-center text-2xl md:text-3xl uppercase ">create room</h1>
+
+        {% if form.non_filed_errors %}
+        {% for error in form.non_filed_errors %}
+        <li class="text-white">{{error}}</li>
+        {% endfor %}
+        {% endif %}
+
+        <input type="text" name="name" id="id_room_name_input" placeholder="room name"
+            class="text-xl font-semibold p-2 rounded-xl ">
+
+        {% if form.name.errors %}
+        {% for error in form.name.errors %}
+        <li class="text-white">{{error}}</li>
+        {% endfor %}
+        {% endif %}
+
+
+        <input type="submit" value="Create" id="id_room_name_submit"
+            class="bg-green-500 text-white p-2 text-center font-bold rounded-xl cursor-pointer">
+    </form>
+</div>
+
+<script>
+    scoll();
+    function scoll() {
+        const displayRooms = document.querySelector(".display-rooms");
+        displayRooms.scrollTop = displayRooms.scrollHeight;
+    }
+
+    const id_create_room = document.getElementById("id_create_room")
+    let submit = true;
+    id_create_room.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+        const id_room_name_input = document.getElementById("id_room_name_input")
+        const id_room_name_submit = document.getElementById("id_room_name_submit")
+        let input = id_room_name_input.value;
+
+
+        if (input.trim().length < 5) {
+            alert("Room name must conatain at lease 5 characters.")
+            submit = false;
+            id_room_name_input.value = '';
+        }
+
+        if (submit == true) {
+            id_create_room.submit()
+
+        }
+    })
+
+</script>
+{% endblock %}

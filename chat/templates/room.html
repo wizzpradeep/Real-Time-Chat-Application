@@ -1,0 +1,108 @@
+<!-- room.html -->
+{% extends 'base.html' %}
+
+{% block head%}
+<title>Rooms | {{room.name}}</title>
+{% endblock %}
+
+{% block body %}
+
+<div
+    class=" w-[95%] md:w-[50vw] mx-auto h-[450px] md:h-[500px] brd py-5 px-4 bg-gray-800 mt-4 md:mt-10 flex flex-col rounded-2xl shadow-3xl relative">
+    <h1 class="text-white text-center font-bold text-2xl mb-4">{{room.name}}</h1>
+    <div class="display-rooms  flex-1 overflow-scroll scrollbar-hide flex flex-col gap-5">
+        {% for message in chats %}
+        <div
+            class="text-white p-4 relative {% if message.user == request.user %}bg-blue-900{% else %}bg-gray-700{% endif %} rounded-3xl ">
+            <p class="font-bold text-gray-500">{{message.user.username}}</p>
+            <p class="text-white">{{message.content}}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <form action="" method="post" id="id_message_form"
+        class=" rounded flex gap-1  md:gap-4 bg-gray-700 mt-5 md:py-4 md:px-3 rounded-3xl">
+        {% csrf_token %}
+
+        {% if form.non_filed_errors %}
+        {% for error in form.non_filed_errors %}
+        <li class="text-white">{{error}}</li>
+        {% endfor %}
+        {% endif %}
+
+        <div class="flex w-full p-2 gap-5 flex-col">
+            <input type="text" name="content" id="id_content_input" placeholder="message.."
+                class="text-xl font-semibold p-2 rounded-xl flex-1  ">
+
+            <input class="hidden" id="room_id" type="text" value="{{room.id}}">
+            <input class="hidden" id="username" type="text" value="{{request.user}}">
+
+            {% if form.name.errors %}
+            {% for error in form.name.errors %}
+            <li class="text-white">{{error}}</li>
+            {% endfor %}
+            {% endif %}
+
+            <input type="submit" value="Send" id="id_content_send"
+                class="bg-green-500 text-white p-2 text-center font-bold rounded-xl cursor-pointer w-22">
+        </div>
+    </form>
+</div>
+
+
+
+<script>
+
+    const displayRooms = document.querySelector(".display-rooms");
+    displayRooms.scrollTop = displayRooms.scrollHeight;
+
+    // Fetch room_id and username values
+    const room_id = document.getElementById("room_id").value;
+    const username = document.getElementById("username").value;
+
+    // WebSocket connection setup
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/${room_id}/`);
+
+    // On receiving a message
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        let messsageClass = data.username === username ? 'bg-blue-900' : 'bg-gray-900';
+
+        let html = `
+            <div class="text-white p-4 relative ${messsageClass} rounded-3xl">
+                <p class="font-bold text-gray-500">${data.username}</p>
+                <p class="text-white">${data.message}</p>
+            </div>`;
+
+        document.querySelector(".display-rooms").innerHTML += html;
+
+        // Scroll to the bottom after adding a new message
+        const displayRooms = document.querySelector(".display-rooms");
+        displayRooms.scrollTop = displayRooms.scrollHeight;
+    };
+
+    // Handle message form submission
+    const id_content_input = document.getElementById("id_content_input");
+    const id_message_form = document.getElementById("id_message_form");
+
+    id_message_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const message = id_content_input.value.trim();
+        if (message) {
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': username,
+                'room_id': room_id,
+            }));
+
+            // Clear the input field
+            id_content_input.value = "";
+        }
+        return false;
+    });
+</script>
+
+{% endblock %}

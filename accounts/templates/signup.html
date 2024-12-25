@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Signup</title>
+{% endblock %}
+
+{% block body %}
+<div class="main">
+    <h1 class="text-center text-3xl sm:text-4xl  lg:text-5xl font-extrabold uppercase p-4 md:p-6 lg:p-10">Signup</h1>
+</div>
+
+<form action="{% url 'signup' %}" method="post"
+    class="shadows-3xl border border-black mx-auto  pt-12 pb-5 md:pt-12 md:pb-6 md:px-4 bg-gray-900 md:rounded-3xl  rounded w-[90%] lg:w-1/2">
+    {% csrf_token %}
+    <div class="w-[90%] mx-auto">
+
+        <div class="flex flex-col gap-3">
+
+            {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <li class="text-gray-300">{{error}}</li>
+            {% endfor %}
+            {% endif %}
+
+            <input class="px-2 py-2 text-xl font-bold border-none outline-none lowercase  rounded" autofocus type="text"
+                name="username" id="username" placeholder="Username">
+
+            {% if form.username.errors %}
+            {% for error in form.username.errors %}
+            <li class="text-gray-300">{{error}}</li>
+            {% endfor %}
+            {% endif %}
+
+            <input class="px-2 py-2 text-xl font-bold border-none outline-none lowercase rounded" autofocus
+                type="password" name="password1" id="password1" placeholder="Enter Password">
+
+            {% if form.password1.errors %}
+            {% for error in form.password1.errors %}
+            <li class="text-gray-300">{{error}}</li>
+            {% endfor %}
+            {% endif %}
+
+
+            <input class="px-2 py-2 text-xl font-bold border-none outline-none lowercase rounded" autofocus
+                type="password" name="password2" id="password2" placeholder="Confirm Password">
+
+            {% if form.password2.errors %}
+            {% for error in form.password2.errors %}
+            <li class="text-gray-300">{{error}}</li>
+            {% endfor %}
+            {% endif %}
+
+        </div>
+        <div class="flex flex-col gap-3">
+
+            <input
+                class="bg-green-800 w-full mt-5  py-2 text-3xl uppercase font-bold text-white rounded cursor-pointer hover:bg-green-900"
+                type="submit" value="Signup">
+
+            <a href="{% url 'signin' %}"
+                class="w-full  text-gray-400 hover:text-gray-500 text-center hover:underline">signin</a>
+
+        </div>
+
+    </div>
+
+</form>
+{% endblock %}
